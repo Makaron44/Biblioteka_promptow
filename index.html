@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Library 6.0 (Dark Mode)</title>
+    <style>
+        /* --- 1. ZMIENNE KOLORÓW (MOTYW JASNY - DOMYŚLNY) --- */
+        :root {
+            --primary: #4a90e2;       /* Główny akcent */
+            --success: #2ecc71;       /* Zielony */
+            --warning: #f39c12;       /* Pomarańczowy */
+            --danger: #e74c3c;        /* Czerwony */
+            
+            /* Kolory tła i tekstu (zmieniają się w Dark Mode) */
+            --bg-body: #f7f9fc;       /* Tło całej strony */
+            --bg-card: #ffffff;       /* Tło kart i formularzy */
+            --bg-input: #ffffff;      /* Tło pól tekstowych */
+            --text-main: #2c3e50;     /* Główny tekst */
+            --text-muted: #636e72;    /* Tekst poboczny */
+            --border: #dfe6e9;        /* Ramki */
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --code-bg: #f8f9fa;       /* Tło treści promptu */
+        }
+
+        /* --- MOTYW CIEMNY (OVERRIDES) --- */
+        body.dark-mode {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2d2d2d;
+            --text-main: #ecf0f1;
+            --text-muted: #b2bec3;
+            --border: #444;
+            --shadow: 0 4px 6px rgba(0,0,0,0.5);
+            --code-bg: #2d2d2d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            padding-bottom: 50px;
+            transition: background-color 0.3s, color 0.3s; /* Płynne przejście */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative; /* Dla pozycjonowania przycisku trybu */
+        }
+
+        /* Nagłówek i przycisk Dark Mode */
+        .header-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; color: var(--text-main); }
+
+        #themeToggleBtn {
+            position: absolute;
+            right: 0;
+            background: none;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        #themeToggleBtn:hover { background-color: var(--border); }
+
+        /* --- STICKY SEARCH --- */
+        .search-wrapper {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-body);
+            padding: 10px 0;
+            z-index: 100;
+            transition: background-color 0.3s;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: var(--shadow);
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        #searchInput:focus { border-color: var(--primary); }
+
+        /* --- FORMULARZ --- */
+        .form-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        
+        .form-container.editing-mode { border-color: var(--warning); }
+        .form-title { margin-top: 0; font-size: 1.2rem; margin-bottom: 15px; color: var(--text-main); }
+
+        input.input-field, textarea.input-field {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            background-color: var(--bg-input);
+            color: var(--text-main);
+        }
+
+        button#save-btn {
+            width: 100%;
+            background-color: var(--success);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button#save-btn:active { transform: scale(0.98); }
+        button#save-btn.edit-btn-active { background-color: var(--warning); }
+
+        /* --- PANEL USTAWIEŃ --- */
+        .settings-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .settings-title { font-weight: bold; font-size: 0.9rem; color: var(--text-muted); width: 100%; margin-bottom: 5px; }
+        
+        .io-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+        }
+        .export-btn { background-color: #34495e; }
+        .import-btn { background-color: #34495e; }
+        .io-btn:hover { opacity: 0.9; }
+        #fileInput { display: none; }
+
+        /* --- KARTY PROMPTÓW --- */
+        .prompt-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, background-color 0.3s;
+            border-left: 6px solid var(--primary);
+        }
+
+        .prompt-card:hover { transform: translateY(-3px); }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .prompt-title { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+        
+        .prompt-content {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        .prompt-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .prompt-tags {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--bg-input);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .copy-btn { background-color: var(--primary); color: white; }
+        .edit-btn { background-color: var(--warning); color: white; }
+        .delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
+        .delete-btn:hover { background-color: rgba(231, 76, 60, 0.1); }
+
+        #loadMoreBtn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            border: 2px dashed var(--border);
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            transition: all 0.3s;
+        }
+        #loadMoreBtn:hover { border-color: var(--primary); color: var(--primary); background-color: var(--bg-card); }
+        #loadMoreBtn.collapse-mode { border-color: var(--primary); background-color: rgba(74, 144, 226, 0.1); color: var(--primary); }
+        .hidden { display: none !important; }
+
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            h1 { font-size: 1.4rem; }
+            .prompt-footer { flex-direction: column; align-items: flex-start; }
+            .actions { width: 100%; margin-top: 10px; }
+            .btn { flex: 1; justify-content: center; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header-row">
+        <h1>📚 Biblioteka Promptów</h1>
+        <button id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="🔍 Szukaj..." onkeyup="handleSearch()">
+    </div>
+
+    <div class="settings-panel">
+        <div class="settings-title">⚙️ Zarządzanie danymi</div>
+        <button class="io-btn export-btn" onclick="exportData()">⬇️ Eksportuj</button>
+        <button class="io-btn import-btn" onclick="document.getElementById('fileInput').click()">⬆️ Importuj</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+    </div>
+
+    <div class="form-container" id="mainForm">
+        <h3 class="form-title" id="formHeader">Dodaj nowy wpis</h3>
+        <input type="text" class="input-field" id="inputTitle" placeholder="Tytuł promptu">
+        <textarea class="input-field" id="inputContent" rows="3" placeholder="Treść promptu..."></textarea>
+        <input type="text" class="input-field" id="inputTags" placeholder="Tagi (np. #python, #seo)">
+        <button id="save-btn" onclick="savePrompt()">➕ Dodaj Prompt</button>
+    </div>
+
+    <div id="promptList"></div>
+
+    <button id="loadMoreBtn"></button>
+</div>
+
+<script>
+    // --- ZMIENNE STANU ---
+    let prompts = JSON.parse(localStorage.getItem('myPrompts')) || [];
+    let itemsToShow = 5; 
+    let currentFilteredList = []; 
+    let editingId = null;
+
+    // --- START APLIKACJI ---
+    init();
+
+    function init() {
+        // 1. Sprawdź motyw (Dark Mode)
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggleBtn').innerText = '☀️';
+        }
+
+        // 2. Wczytaj dane
+        currentFilteredList = prompts;
+        renderList();
+    }
+
+    // --- NOWA FUNKCJA: PRZEŁĄCZANIE MOTYWU ---
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById('themeToggleBtn');
+        
+        body.classList.toggle('dark-mode');
+
+        if (body.classList.contains('dark-mode')) {
+            btn.innerText = '☀️'; // Słoneczko w trybie ciemnym
+            localStorage.setItem('theme', 'dark');
+        } else {
+            btn.innerText = '🌙'; // Księżyc w trybie jasnym
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // --- FUNKCJE EKSPORTU I IMPORTU ---
+    function exportData() {
+        if (prompts.length === 0) { alert("Brak danych!"); return; }
+        const dataStr = JSON.stringify(prompts, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const date = new Date().toISOString().split('T')[0];
+        a.download = `prompty_backup_${date}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importData(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    if(confirm(`Wczytać ${importedData.length} promptów? To nadpisze obecną listę.`)) {
+                        prompts = importedData;
+                        saveData();
+                        currentFilteredList = prompts;
+                        itemsToShow = 5;
+                        renderList();
+                        alert("✅ Gotowe!");
+                    }
+                } else { alert("Błąd formatu pliku."); }
+            } catch (err) { alert("Błąd odczytu pliku."); }
+            input.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    // --- RENDEROWANIE ---
+    function renderList() {
+        const listContainer = document.getElementById('promptList');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        listContainer.innerHTML = '';
+
+        if (currentFilteredList.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted);">Brak wyników.</p>';
+            loadMoreBtn.classList.add('hidden');
+            return;
+        }
+
+        const visiblePrompts = currentFilteredList.slice(0, itemsToShow);
+
+        visiblePrompts.forEach(prompt => {
+            const promptHTML = `
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <span class="prompt-title">${prompt.title}</span>
+                    </div>
+                    <div class="prompt-content">${prompt.content}</div>
+                    <div class="prompt-footer">
+                        <span class="prompt-tags">🏷️ ${prompt.tags || 'brak'}</span>
+                        <div class="actions">
+                            <button class="btn copy-btn" onclick="copyToClipboard(${prompt.id})">📋</button>
+                            <button class="btn edit-btn" onclick="startEdit(${prompt.id})">✏️</button>
+                            <button class="btn delete-btn" onclick="deletePrompt(${prompt.id})">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            listContainer.innerHTML += promptHTML;
+        });
+
+        // Obsługa przycisku więcej/zwiń
+        if (currentFilteredList.length <= 5) {
+            loadMoreBtn.classList.add('hidden');
+        } else if (itemsToShow < currentFilteredList.length) {
+            loadMoreBtn.classList.remove('hidden');
+            loadMoreBtn.classList.remove('collapse-mode');
+            const remaining = currentFilteredList.length - itemsToShow;
+            loadMoreBtn.innerText = `⬇️ Pokaż więcej (jeszcze ${remaining})`;
+            loadMoreBtn.onclick = loadMore;
+        } else {
+            loadMoreBtn.classList.remove('hidden');
+            loadMoreBtn.classList.add('collapse-mode');
+            loadMoreBtn.innerText = `⬆️ Zwiń listę`;
+            loadMoreBtn.onclick = collapseList;
+        }
+    }
+
+    function loadMore() { itemsToShow += 5; renderList(); }
+    function collapseList() { itemsToShow = 5; renderList(); document.getElementById('mainForm').scrollIntoView({ behavior: 'smooth', block: 'end' }); }
+
+    // --- EDYCJA I ZAPIS ---
+    function startEdit(id) {
+        const promptToEdit = prompts.find(p => p.id === id);
+        if (!promptToEdit) return;
+        document.getElementById('inputTitle').value = promptToEdit.title;
+        document.getElementById('inputContent').value = promptToEdit.content;
+        document.getElementById('inputTags').value = promptToEdit.tags;
+        editingId = id;
+        const saveBtn = document.getElementById('save-btn');
+        const formContainer = document.getElementById('mainForm');
+        saveBtn.innerText = "💾 Zapisz zmiany";
+        saveBtn.classList.add('edit-btn-active'); 
+        formContainer.classList.add('editing-mode'); 
+        document.getElementById('formHeader').innerText = "Edytujesz wpis...";
+        formContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function savePrompt() {
+        const title = document.getElementById('inputTitle').value;
+        const content = document.getElementById('inputContent').value;
+        const tags = document.getElementById('inputTags').value;
+        if (!title || !content) { alert("Tytuł i treść są wymagane!"); return; }
+
+        if (editingId) {
+            const index = prompts.findIndex(p => p.id === editingId);
+            if (index !== -1) {
+                prompts[index].title = title;
+                prompts[index].content = content;
+                prompts[index].tags = tags;
+            }
+        } else {
+            const newPrompt = { id: Date.now(), title, content, tags };
+            prompts.unshift(newPrompt);
+        }
+        saveData();
+        resetForm();
+        document.getElementById('searchInput').value = '';
+        currentFilteredList = prompts;
+        itemsToShow = 5; 
+        renderList();
+    }
+
+    function resetForm() {
+        document.getElementById('inputTitle').value = '';
+        document.getElementById('inputContent').value = '';
+        document.getElementById('inputTags').value = '';
+        editingId = null;
+        const saveBtn = document.getElementById('save-btn');
+        const formContainer = document.getElementById('mainForm');
+        saveBtn.innerText = "➕ Dodaj Prompt";
+        saveBtn.classList.remove('edit-btn-active');
+        formContainer.classList.remove('editing-mode');
+        document.getElementById('formHeader').innerText = "Dodaj nowy wpis";
+    }
+
+    // --- POZOSTAŁE ---
+    function handleSearch() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        currentFilteredList = prompts.filter(p => 
+            p.title.toLowerCase().includes(searchText) || 
+            p.content.toLowerCase().includes(searchText) ||
+            p.tags.toLowerCase().includes(searchText)
+        );
+        itemsToShow = 5; renderList();
+    }
+
+    function deletePrompt(id) {
+        if(confirm("Usunąć?")) {
+            if (editingId === id) resetForm();
+            prompts = prompts.filter(p => p.id !== id);
+            saveData();
+            handleSearch(); 
+        }
+    }
+
+    function copyToClipboard(id) {
+        const item = prompts.find(p => p.id === id);
+        if(item) { navigator.clipboard.writeText(item.content).then(() => alert("✅ Skopiowano!")); }
+    }
+
+    function saveData() { localStorage.setItem('myPrompts', JSON.stringify(prompts)); }
+</script>
+
+</body>
+</html>
