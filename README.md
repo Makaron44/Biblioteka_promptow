@@ -37,4 +37,4 @@ Projekt został stworzony w czystych technologiach webowych (Vanilla JS), bez u�
 *(Tutaj w przyszłości możesz dodać zrzuty ekranu swojej aplikacji, np. jeden w trybie jasnym, drugi w ciemnym)*
 
 ---
-Created with ❤️ by [Twój Nick]
+Created with ❤️ by Makaron44
