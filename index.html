@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Library 6.0 (Dark Mode)</title>
+    <title>Prompt Library 7.0 (Notes Edition)</title>
     <style>
-        /* --- 1. ZMIENNE KOLORÓW (MOTYW JASNY - DOMYŚLNY) --- */
+        /* --- 1. ZMIENNE KOLORÓW --- */
         :root {
-            --primary: #4a90e2;       /* Główny akcent */
-            --success: #2ecc71;       /* Zielony */
-            --warning: #f39c12;       /* Pomarańczowy */
-            --danger: #e74c3c;        /* Czerwony */
+            --primary: #4a90e2;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #8e44ad;          /* NOWOŚĆ: Kolor dla notatek (fioletowy) */
             
-            /* Kolory tła i tekstu (zmieniają się w Dark Mode) */
-            --bg-body: #f7f9fc;       /* Tło całej strony */
-            --bg-card: #ffffff;       /* Tło kart i formularzy */
-            --bg-input: #ffffff;      /* Tło pól tekstowych */
-            --text-main: #2c3e50;     /* Główny tekst */
-            --text-muted: #636e72;    /* Tekst poboczny */
-            --border: #dfe6e9;        /* Ramki */
+            --bg-body: #f7f9fc;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
             --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --code-bg: #f8f9fa;       /* Tło treści promptu */
+            --code-bg: #f8f9fa;
+            --note-bg: #fff8e1;       /* Tło notatki w trybie jasnym (lekko żółte) */
+            --note-border: #ffe082;
+            --note-text: #5d4037;
         }
 
-        /* --- MOTYW CIEMNY (OVERRIDES) --- */
+        /* --- DARK MODE --- */
         body.dark-mode {
             --bg-body: #121212;
             --bg-card: #1e1e1e;
@@ -33,6 +36,9 @@
             --border: #444;
             --shadow: 0 4px 6px rgba(0,0,0,0.5);
             --code-bg: #2d2d2d;
+            --note-bg: #3e3e28;       /* Ciemno-żółte tło dla notatek w dark mode */
+            --note-border: #665c26;
+            --note-text: #fff9c4;
         }
 
         body {
@@ -43,17 +49,17 @@
             padding: 0;
             line-height: 1.6;
             padding-bottom: 50px;
-            transition: background-color 0.3s, color 0.3s; /* Płynne przejście */
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            position: relative; /* Dla pozycjonowania przycisku trybu */
+            position: relative;
         }
 
-        /* Nagłówek i przycisk Dark Mode */
+        /* HEADER */
         .header-row {
             display: flex;
             justify-content: center;
@@ -61,9 +67,7 @@
             position: relative;
             margin-bottom: 20px;
         }
-
         h1 { margin: 0; font-size: 1.8rem; color: var(--text-main); }
-
         #themeToggleBtn {
             position: absolute;
             right: 0;
@@ -82,7 +86,7 @@
         }
         #themeToggleBtn:hover { background-color: var(--border); }
 
-        /* --- STICKY SEARCH --- */
+        /* SEARCH */
         .search-wrapper {
             position: sticky;
             top: 0;
@@ -91,7 +95,6 @@
             z-index: 100;
             transition: background-color 0.3s;
         }
-
         #searchInput {
             width: 100%;
             padding: 15px;
@@ -107,7 +110,7 @@
         }
         #searchInput:focus { border-color: var(--primary); }
 
-        /* --- FORMULARZ --- */
+        /* FORM */
         .form-container {
             background: var(--bg-card);
             padding: 20px;
@@ -117,7 +120,6 @@
             border: 2px solid transparent;
             transition: border-color 0.3s, background-color 0.3s;
         }
-        
         .form-container.editing-mode { border-color: var(--warning); }
         .form-title { margin-top: 0; font-size: 1.2rem; margin-bottom: 15px; color: var(--text-main); }
 
@@ -131,6 +133,11 @@
             font-family: inherit;
             background-color: var(--bg-input);
             color: var(--text-main);
+        }
+
+        /* Styl dla pola notatki (opcjonalne wyróżnienie w formularzu) */
+        #inputNote {
+            border-style: dashed; 
         }
 
         button#save-btn {
@@ -148,7 +155,7 @@
         button#save-btn:active { transform: scale(0.98); }
         button#save-btn.edit-btn-active { background-color: var(--warning); }
 
-        /* --- PANEL USTAWIEŃ --- */
+        /* SETTINGS PANEL */
         .settings-panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -162,7 +169,6 @@
             gap: 10px;
         }
         .settings-title { font-weight: bold; font-size: 0.9rem; color: var(--text-muted); width: 100%; margin-bottom: 5px; }
-        
         .io-btn {
             flex: 1;
             padding: 10px;
@@ -173,13 +179,12 @@
             font-weight: 600;
             color: white;
             text-align: center;
+            background-color: #34495e;
         }
-        .export-btn { background-color: #34495e; }
-        .import-btn { background-color: #34495e; }
         .io-btn:hover { opacity: 0.9; }
         #fileInput { display: none; }
 
-        /* --- KARTY PROMPTÓW --- */
+        /* CARDS */
         .prompt-card {
             background: var(--bg-card);
             border-radius: 12px;
@@ -189,7 +194,6 @@
             transition: transform 0.2s, background-color 0.3s;
             border-left: 6px solid var(--primary);
         }
-
         .prompt-card:hover { transform: translateY(-3px); }
 
         .prompt-header {
@@ -212,6 +216,22 @@
             border: 1px solid var(--border);
         }
 
+        /* NOWOŚĆ: Wygląd notatki w karcie */
+        .prompt-note-block {
+            margin-top: 15px;
+            background-color: var(--note-bg);
+            border: 1px solid var(--note-border);
+            color: var(--note-text);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .note-icon { font-size: 1.2em; }
+        .note-text { white-space: pre-wrap; }
+
         .prompt-footer {
             display: flex;
             justify-content: space-between;
@@ -220,7 +240,6 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-
         .prompt-tags {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -231,7 +250,6 @@
         }
 
         .actions { display: flex; gap: 10px; align-items: center; }
-
         .btn {
             padding: 8px 16px;
             border: none;
@@ -246,8 +264,7 @@
         .copy-btn { background-color: var(--primary); color: white; }
         .edit-btn { background-color: var(--warning); color: white; }
         .delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
-        .delete-btn:hover { background-color: rgba(231, 76, 60, 0.1); }
-
+        
         #loadMoreBtn {
             display: block;
             width: 100%;
@@ -298,6 +315,9 @@
         <h3 class="form-title" id="formHeader">Dodaj nowy wpis</h3>
         <input type="text" class="input-field" id="inputTitle" placeholder="Tytuł promptu">
         <textarea class="input-field" id="inputContent" rows="3" placeholder="Treść promptu..."></textarea>
+        
+        <textarea class="input-field" id="inputNote" rows="2" placeholder="💡 Notatki / Instrukcja (np. 'zmień --v na 5.2, dodaj zdjęcie twarzy')"></textarea>
+        
         <input type="text" class="input-field" id="inputTags" placeholder="Tagi (np. #python, #seo)">
         <button id="save-btn" onclick="savePrompt()">➕ Dodaj Prompt</button>
     </div>
@@ -308,45 +328,36 @@
 </div>
 
 <script>
-    // --- ZMIENNE STANU ---
     let prompts = JSON.parse(localStorage.getItem('myPrompts')) || [];
     let itemsToShow = 5; 
     let currentFilteredList = []; 
     let editingId = null;
 
-    // --- START APLIKACJI ---
     init();
 
     function init() {
-        // 1. Sprawdź motyw (Dark Mode)
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
             document.getElementById('themeToggleBtn').innerText = '☀️';
         }
-
-        // 2. Wczytaj dane
         currentFilteredList = prompts;
         renderList();
     }
 
-    // --- NOWA FUNKCJA: PRZEŁĄCZANIE MOTYWU ---
     function toggleTheme() {
         const body = document.body;
         const btn = document.getElementById('themeToggleBtn');
-        
         body.classList.toggle('dark-mode');
-
         if (body.classList.contains('dark-mode')) {
-            btn.innerText = '☀️'; // Słoneczko w trybie ciemnym
+            btn.innerText = '☀️';
             localStorage.setItem('theme', 'dark');
         } else {
-            btn.innerText = '🌙'; // Księżyc w trybie jasnym
+            btn.innerText = '🌙';
             localStorage.setItem('theme', 'light');
         }
     }
 
-    // --- FUNKCJE EKSPORTU I IMPORTU ---
     function exportData() {
         if (prompts.length === 0) { alert("Brak danych!"); return; }
         const dataStr = JSON.stringify(prompts, null, 2);
@@ -368,7 +379,7 @@
             try {
                 const importedData = JSON.parse(e.target.result);
                 if (Array.isArray(importedData)) {
-                    if(confirm(`Wczytać ${importedData.length} promptów? To nadpisze obecną listę.`)) {
+                    if(confirm(`Wczytać ${importedData.length} promptów?`)) {
                         prompts = importedData;
                         saveData();
                         currentFilteredList = prompts;
@@ -383,7 +394,6 @@
         reader.readAsText(file);
     }
 
-    // --- RENDEROWANIE ---
     function renderList() {
         const listContainer = document.getElementById('promptList');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -398,13 +408,25 @@
         const visiblePrompts = currentFilteredList.slice(0, itemsToShow);
 
         visiblePrompts.forEach(prompt => {
+            // Logika wyświetlania notatki tylko jeśli istnieje
+            let noteHTML = '';
+            if (prompt.note && prompt.note.trim() !== '') {
+                noteHTML = `
+                    <div class="prompt-note-block">
+                        <span class="note-icon">💡</span>
+                        <span class="note-text">${prompt.note}</span>
+                    </div>
+                `;
+            }
+
             const promptHTML = `
                 <div class="prompt-card">
                     <div class="prompt-header">
                         <span class="prompt-title">${prompt.title}</span>
                     </div>
                     <div class="prompt-content">${prompt.content}</div>
-                    <div class="prompt-footer">
+                    
+                    ${noteHTML} <div class="prompt-footer">
                         <span class="prompt-tags">🏷️ ${prompt.tags || 'brak'}</span>
                         <div class="actions">
                             <button class="btn copy-btn" onclick="copyToClipboard(${prompt.id})">📋</button>
@@ -417,7 +439,6 @@
             listContainer.innerHTML += promptHTML;
         });
 
-        // Obsługa przycisku więcej/zwiń
         if (currentFilteredList.length <= 5) {
             loadMoreBtn.classList.add('hidden');
         } else if (itemsToShow < currentFilteredList.length) {
@@ -437,13 +458,16 @@
     function loadMore() { itemsToShow += 5; renderList(); }
     function collapseList() { itemsToShow = 5; renderList(); document.getElementById('mainForm').scrollIntoView({ behavior: 'smooth', block: 'end' }); }
 
-    // --- EDYCJA I ZAPIS ---
     function startEdit(id) {
         const promptToEdit = prompts.find(p => p.id === id);
         if (!promptToEdit) return;
+        
         document.getElementById('inputTitle').value = promptToEdit.title;
         document.getElementById('inputContent').value = promptToEdit.content;
+        // Wypełniamy pole notatki (jeśli notatka nie istnieje, wstaw pusty ciąg)
+        document.getElementById('inputNote').value = promptToEdit.note || ''; 
         document.getElementById('inputTags').value = promptToEdit.tags;
+        
         editingId = id;
         const saveBtn = document.getElementById('save-btn');
         const formContainer = document.getElementById('mainForm');
@@ -457,7 +481,9 @@
     function savePrompt() {
         const title = document.getElementById('inputTitle').value;
         const content = document.getElementById('inputContent').value;
+        const note = document.getElementById('inputNote').value; // Pobieramy notatkę
         const tags = document.getElementById('inputTags').value;
+
         if (!title || !content) { alert("Tytuł i treść są wymagane!"); return; }
 
         if (editingId) {
@@ -465,10 +491,17 @@
             if (index !== -1) {
                 prompts[index].title = title;
                 prompts[index].content = content;
+                prompts[index].note = note; // Aktualizujemy notatkę
                 prompts[index].tags = tags;
             }
         } else {
-            const newPrompt = { id: Date.now(), title, content, tags };
+            const newPrompt = { 
+                id: Date.now(), 
+                title, 
+                content, 
+                note, // Zapisujemy notatkę
+                tags 
+            };
             prompts.unshift(newPrompt);
         }
         saveData();
@@ -482,7 +515,9 @@
     function resetForm() {
         document.getElementById('inputTitle').value = '';
         document.getElementById('inputContent').value = '';
+        document.getElementById('inputNote').value = ''; // Czyścimy pole notatki
         document.getElementById('inputTags').value = '';
+        
         editingId = null;
         const saveBtn = document.getElementById('save-btn');
         const formContainer = document.getElementById('mainForm');
@@ -492,12 +527,13 @@
         document.getElementById('formHeader').innerText = "Dodaj nowy wpis";
     }
 
-    // --- POZOSTAŁE ---
     function handleSearch() {
         const searchText = document.getElementById('searchInput').value.toLowerCase();
         currentFilteredList = prompts.filter(p => 
             p.title.toLowerCase().includes(searchText) || 
             p.content.toLowerCase().includes(searchText) ||
+            // Przeszukujemy też notatki!
+            (p.note && p.note.toLowerCase().includes(searchText)) || 
             p.tags.toLowerCase().includes(searchText)
         );
         itemsToShow = 5; renderList();
